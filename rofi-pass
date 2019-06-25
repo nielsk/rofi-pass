@@ -70,9 +70,9 @@ list_passwords() {
 
 doClip () {
 	case "$clip" in
-		"primary") xclip ;;
-		"clipboard") xclip -selection clipboard;;
-		"both") xclip; xclip -o | xclip -selection clipboard;;
+		"primary") wl-copy ;;
+		"clipboard") wl-copy --primary;;
+		"both") wl-copy; wl-paste | wl-copy --primary;;
 	esac
 }
 
@@ -245,9 +245,9 @@ copyPass () {
 	fi
 
 	if [[ $notify == "true" ]]; then
-		(sleep $clip_clear; printf '%s' "" | xclip; printf '%s' "" | xclip -selection clipboard | notify-send "rofi-pass" "Clipboard cleared") &
+		(sleep $clip_clear; printf '%s' "" | wl-copy -c | notify-send "rofi-pass" "Clipboard cleared") &
 	elif [[ $notify == "false" ]]; then
-		(sleep $clip_clear; printf '%s' "" | xclip; printf '%s' "" | xclip -selection clipboard) &
+		(sleep $clip_clear; printf '%s' "" | wl-copy -c) &
 	fi
 }
 
@@ -463,23 +463,23 @@ clearUp () {
 
 helpMenu () {
 	printf '%s' "${autotype}: Autotype
-	${type_user}: Type Username
-	${type_pass}: Type Password
-	${qrcode}: Generate and display qrcode
-	---
-	${copy_name}: Copy Username
-	${copy_pass}: Copy Password
-	${copy_url}: Copy URL
-	${open_url}: Open URL
-	${copy_menu}: Copy Custom Field
-	---
-	${action_menu}: Edit, Move, Delete, Re-generate Submenu
-	${show}: Show Password File
-	${insert_pass}: Insert new Pass Entry
-	${switch}: Switch Pass/Bookmark Mode
-	---
-	${previous_root}: Switch to previous password store (--root)
-	${next_root}: Switch to next password store (--root)
+${type_user}: Type Username
+${type_pass}: Type Password
+${qrcode}: Generate and display qrcode
+---
+${copy_name}: Copy Username
+${copy_pass}: Copy Password
+${copy_url}: Copy URL
+${open_url}: Open URL
+${copy_menu}: Copy Custom Field
+---
+${action_menu}: Edit, Move, Delete, Re-generate Submenu
+${show}: Show Password File
+${insert_pass}: Insert new Pass Entry
+${switch}: Switch Pass/Bookmark Mode
+---
+${previous_root}: Switch to previous password store (--root)
+${next_root}: Switch to next password store (--root)
 	" | _rofi -dmenu -mesg "Hint: All hotkeys are configurable in config file" -p "Help > "
 	help_val=$?
 
@@ -607,9 +607,9 @@ showEntry () {
 				notify-send "rofi-pass" "Copied Password\\nClearing in $clip_clear seconds"
 			fi
 			if [[ $notify == "true" ]]; then
-				(sleep $clip_clear; printf '%s' "" | xclip; printf '%s' "" | xclip -selection clipboard | notify-send "rofi-pass" "Clipboard cleared") &
+				(sleep $clip_clear; printf '%s' "" | wl-copy -c | notify-send "rofi-pass" "Clipboard cleared") &
 			elif [[ $notify == "false" ]]; 	then
-				(sleep $clip_clear; printf '%s' "" | xclip; printf '%s' "" | xclip -selection clipboard) &
+				(sleep $clip_clear; printf '%s' "" | wl-copy -c) &
 			fi
 			exit
 		fi
@@ -670,7 +670,7 @@ listgpg () {
 }
 
 insertPass () {
-	url=$(xclip --selection clipboard -o)
+	url=$(wl-paste)
 
 	if [[ "${url:0:4}" == "http" ]]; then
 		domain_name="$(printf '%s\n' "${url}" | awk -F / '{l=split($3,a,"."); print (a[l-1]=="com"?a[l-2] OFS:X) a[l-1] OFS a[l]}' OFS=".")"
